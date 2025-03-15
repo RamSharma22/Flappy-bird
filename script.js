@@ -1,123 +1,130 @@
-const bird = document.getElementById("bird");
-const pipesContainer = document.getElementById("pipes");
-const startButton = document.getElementById("start-button");
-const restartButton = document.getElementById("restart-button");
-const gameOverPanel = document.getElementById("game-over-panel");
-const scoreDisplay = document.getElementById("score-display");
-const finalScore = document.getElementById("final-score");
+// JavaScript Game Logic
+const bird = document.getElementById('bird');
+const gameContainer = document.getElementById('game-container');
+const scoreDisplay = document.getElementById('score');
+const startButton = document.getElementById('start-button');
+const restartButton = document.getElementById('restart-button');
 
 let birdTop = 250;
 let gravity = 2;
-let poleSpeed = 3;
 let score = 0;
 let gameInterval;
-let poleGenerationInterval;
-let isGameOver = false;
+let poleInterval;
+let isGameRunning = false;
 
-// Make the bird flap
-function flap() {
-  birdTop -= 50;
-  bird.style.top = birdTop + "px";
+// Function to create poles
+function createPole() {
+    const poleGap = 150; // Gap between top and bottom poles
+    const poleWidth = 60;
+    const poleLeft = 400; // Start position for poles
+
+    // Random height for the top pole
+    const poleTopHeight = Math.random() * (gameContainer.offsetHeight - poleGap - 100) + 50;
+
+    // Create top pole
+    const poleTop = document.createElement('div');
+    poleTop.classList.add('obstacle');
+    poleTop.style.left = poleLeft + 'px';
+    poleTop.style.top = '0';
+    poleTop.style.height = poleTopHeight + 'px';
+    poleTop.style.width = poleWidth + 'px';
+    gameContainer.appendChild(poleTop);
+
+    // Create bottom pole
+    const poleBottom = document.createElement('div');
+    poleBottom.classList.add('obstacle');
+    poleBottom.style.left = poleLeft + 'px';
+    poleBottom.style.bottom = '0';
+    poleBottom.style.height = (gameContainer.offsetHeight - poleTopHeight - poleGap) + 'px';
+    poleBottom.style.width = poleWidth + 'px';
+    gameContainer.appendChild(poleBottom);
+
+    // Move poles
+    let poleLeftPosition = poleLeft;
+    const poleMoveInterval = setInterval(() => {
+        if (!isGameRunning) {
+            clearInterval(poleMoveInterval);
+            return;
+        }
+
+        poleLeftPosition -= 2;
+        poleTop.style.left = poleLeftPosition + 'px';
+        poleBottom.style.left = poleLeftPosition + 'px';
+
+        // Remove poles when they go off-screen
+        if (poleLeftPosition < -poleWidth) {
+            clearInterval(poleMoveInterval);
+            gameContainer.removeChild(poleTop);
+            gameContainer.removeChild(poleBottom);
+            score++;
+            scoreDisplay.textContent = 'Score: ' + score;
+        }
+
+        // Check for collision
+        if (
+            poleLeftPosition < 90 && poleLeftPosition > 50 &&
+            (birdTop < poleTopHeight || birdTop > poleTopHeight + poleGap)
+        ) {
+            endGame();
+        }
+    }, 20);
 }
 
-// Event listeners for controls
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space" || e.key === "ArrowUp") {
-    flap();
-  }
+// Function to end the game
+function endGame() {
+    isGameRunning = false;
+    clearInterval(gameInterval);
+    clearInterval(poleInterval);
+    restartButton.style.display = 'block';
+    alert('Game Over! Your score: ' + score);
+}
+
+// Function to update the game state
+function startGame() {
+    if (!isGameRunning) return;
+
+    birdTop += gravity;
+    bird.style.top = birdTop + 'px';
+
+    // Check for collision with ground or sky
+    if (birdTop > 560 || birdTop < 0) {
+        endGame();
+    }
+}
+
+// Function to make the bird jump
+function jump() {
+    if (!isGameRunning) return;
+    birdTop -= 60;
+    bird.style.top = birdTop + 'px';
+}
+
+// Event listener for spacebar or up arrow to make the bird jump
+document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space' || event.code === 'ArrowUp') {
+        jump();
+    }
 });
 
-document.addEventListener("touchstart", () => {
-  flap();
+// Event listener for touch events (mobile)
+document.addEventListener('touchstart', function() {
+    jump();
 });
-
-// Generate poles
-function generatePole() {
-  const poleGap = 150;
-  const poleHeight = Math.floor(Math.random() * 300) + 100;
-
-  const topPole = document.createElement("div");
-  topPole.classList.add("pipe");
-  topPole.style.height = poleHeight + "px";
-  topPole.style.top = "0";
-
-  const bottomPole = document.createElement("div");
-  bottomPole.classList.add("pipe", "bottom");
-  bottomPole.style.height = 600 - poleHeight - poleGap + "px";
-  bottomPole.style.bottom = "0";
-
-  pipesContainer.appendChild(topPole);
-  pipesContainer.appendChild(bottomPole);
-
-  // Move poles
-  let polePosition = 400;
-  let scored = false;
-  const poleInterval = setInterval(() => {
-    if (isGameOver) {
-      clearInterval(poleInterval);
-      return;
-    }
-    polePosition -= poleSpeed;
-    topPole.style.right = polePosition + "px";
-    bottomPole.style.right = polePosition + "px";
-
-    // Check for collision
-    if (
-      (polePosition < 90 && polePosition > 50) &&
-      (birdTop < poleHeight || birdTop > poleHeight + poleGap - 40)
-    ) {
-      endGame();
-    }
-
-    // Increase score when the bird passes a pole
-    if (polePosition < 50 && !scored) {
-      score++;
-      scoreDisplay.textContent = `Score: ${score}`;
-      scored = true;
-    }
-
-    // Remove poles when they go off screen
-    if (polePosition < -60) {
-      clearInterval(poleInterval);
-      pipesContainer.removeChild(topPole);
-      pipesContainer.removeChild(bottomPole);
-    }
-  }, 20);
-}
-
-// Apply gravity to the bird
-function applyGravity() {
-  if (isGameOver) return;
-  birdTop += gravity;
-  bird.style.top = birdTop + "px";
-
-  // Check for ground collision
-  if (birdTop > 560) {
-    endGame();
-  }
-}
 
 // Start the game
-function startGame() {
-  isGameOver = false;
-  score = 0;
-  scoreDisplay.textContent = `Score: ${score}`;
-  gameOverPanel.style.display = "none";
-  birdTop = 250;
-  bird.style.top = birdTop + "px";
-  gameInterval = setInterval(applyGravity, 20);
-  poleGenerationInterval = setInterval(generatePole, 2000);
-}
+startButton.addEventListener('click', function() {
+    isGameRunning = true;
+    startButton.style.display = 'none';
+    restartButton.style.display = 'none';
+    score = 0;
+    scoreDisplay.textContent = 'Score: 0';
+    birdTop = 250;
+    bird.style.top = birdTop + 'px';
+    gameInterval = setInterval(startGame, 20);
+    poleInterval = setInterval(createPole, 2000);
+});
 
-// End the game
-function endGame() {
-  isGameOver = true;
-  clearInterval(gameInterval);
-  clearInterval(poleGenerationInterval);
-  finalScore.textContent = score;
-  gameOverPanel.style.display = "block";
-}
-
-// Event listeners
-startButton.addEventListener("click", startGame);
-restartButton.addEventListener("click", startGame);
+// Restart the game
+restartButton.addEventListener('click', function() {
+    location.reload();
+});
