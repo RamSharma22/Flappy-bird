@@ -1,0 +1,115 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #70c5ce;
+  }
+  
+  .game-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 600px;
+    overflow: hidden;
+    background: url('https://freeimghost.net/i/Screenshot-2025-03-15-184238.xUcHH8') no-repeat center center/cover;
+    border: 2px solid #000;
+  }
+  
+  #bird {
+    position: absolute;
+    top: 50%;
+    left: 50px;
+    width: 40px;
+    height: 40px;
+    z-index: 10;
+  }
+  
+  #pipes {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .pipe {
+    position: absolute;
+    width: 60px;
+    background: url('https://freeimghost.net/i/Screenshot-2025-03-15-183737.xUcXac') no-repeat;
+    background-size: cover;
+  }
+  
+  .pipe.bottom {
+    transform: rotate(180deg);
+  }
+  
+  #ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background: url('https://freeimghost.net/i/Screenshot-2025-03-15-183737.xUcXac') repeat-x;
+    animation: ground-scroll 3s linear infinite;
+  }
+  
+  @keyframes ground-scroll {
+    from { background-position: 0 0; }
+    to { background-position: -400px 0; }
+  }
+  
+  #ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #start-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  #game-over-panel {
+    display: none;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  #restart-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+  
+  #score-display {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+  }
